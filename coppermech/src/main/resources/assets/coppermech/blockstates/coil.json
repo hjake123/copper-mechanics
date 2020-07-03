@@ -1,0 +1,13 @@
+{
+  "multipart": [
+       {   "when": { "axis": "y" },
+           "apply": { "model": "coppermech:block/coil"}
+       },
+       {   "when": { "axis": "z" },
+           "apply": { "model": "coppermech:block/coil", "x": 90}
+       },
+       {   "when": { "axis": "x" },
+           "apply": { "model": "coppermech:block/coil", "x": 90, "y": 90 }
+       }
+   ]
+}

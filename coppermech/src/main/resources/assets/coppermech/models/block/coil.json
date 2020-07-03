@@ -1,0 +1,7 @@
+{
+      "parent": "block/cube_column",
+      "textures": {
+          "end": "coppermech:block/coiltop",
+          "side": "coppermech:block/coilside"
+      }
+  }
