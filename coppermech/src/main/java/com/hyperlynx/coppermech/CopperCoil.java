@@ -67,7 +67,7 @@ public class CopperCoil extends RotatedPillarBlock {
 	
 	@Override
 	public boolean canProvidePower(BlockState state) {
-		return true;
+		return false;
 	}
 	
 	@Override
@@ -97,111 +97,12 @@ public class CopperCoil extends RotatedPillarBlock {
 	}
 	
 	@Override
-	public int getStrongPower(BlockState state, IBlockReader blockAccess, BlockPos pos, Direction side) {
-		return state.getWeakPower(blockAccess, pos, side);
-	}
-
-	@Override
-	public int getWeakPower(BlockState state, IBlockReader blockAccess, BlockPos pos, Direction side) { // Coils emit power only out the sides.
-		if(!state.get(axis).equals(side.getAxis()) && state.get(heat) < 3 && !isMiddleCoil(state, blockAccess, pos)){
-			return state.get(power) - state.get(heat);
-		}else {
-			return 0;
-		}
-	}
-	
-	private boolean isMiddleCoil(BlockState state, IBlockReader blockAccess, BlockPos pos){
-		boolean ret;
-		if(state.get(axis).isVertical()) {
-			ret = isConnectedCoil(state, blockAccess, pos.up());
-			ret = ret && isConnectedCoil(state, blockAccess, pos.down());
-		}
-		else if(state.get(axis).equals(Direction.Axis.Z)) {
-			ret = isConnectedCoil(state, blockAccess, pos.north());
-			ret = ret && isConnectedCoil(state, blockAccess, pos.south());		
-		}
-		else {
-			ret = isConnectedCoil(state, blockAccess, pos.east());
-			ret = ret && isConnectedCoil(state, blockAccess, pos.west());		
-		}
-		return ret;
-	}
-	
-	private boolean isConnectedCoil(BlockState state, IBlockReader blockAccess, BlockPos other_pos) {
-		return blockAccess.getBlockState(other_pos).getBlock().equals(this) && blockAccess.getBlockState(other_pos).get(axis).equals(state.get(axis));
-	}
-	
-	//Powers all coils that are connected to the one whose state and position are passed in with the same power as that coil.
-	private void chainPowerCoils(BlockState state, World worldIn, BlockPos pos) {
-		LOGGER.info("Chaining power:");
-		if(state.get(axis).isVertical()) {
-			if(isConnectedCoil(state, worldIn, pos.up())){
-				chainPowerCoilsRecursive(state, worldIn, pos,  Direction.UP, state.get(power), 0);
-			}else if(isConnectedCoil(state, worldIn, pos.down())) {
-				chainPowerCoilsRecursive(state, worldIn, pos, Direction.DOWN, state.get(power), 0);
-			}
-		}
-		else if(state.get(axis).equals(Direction.Axis.Z)) {
-			if(isConnectedCoil(state, worldIn, pos.north())){
-				chainPowerCoilsRecursive(state, worldIn, pos, Direction.NORTH, state.get(power), 0);
-			}
-			else if(isConnectedCoil(state, worldIn, pos.south())) {
-				chainPowerCoilsRecursive(state, worldIn, pos, Direction.SOUTH, state.get(power), 0);
-			}		
-		}
-		else {
-			if(isConnectedCoil(state, worldIn, pos.east())){
-				chainPowerCoilsRecursive(state, worldIn, pos, Direction.EAST, state.get(power), 0);
-			}
-			else if(isConnectedCoil(state, worldIn, pos.west())) {
-				chainPowerCoilsRecursive(state, worldIn, pos, Direction.WEST, state.get(power), 0);
-			}		
-		}
-	}
-	
-	private void chainPowerCoilsRecursive(BlockState state, World worldIn, BlockPos pos, Direction dir, int pow, int recursion_depth) {
-		if(recursion_depth >= COIL_POWER_RANGE) return;
-		LOGGER.info("\tchained " + recursion_depth);
-		BlockPos other_pos = pos.offset(dir);
-		if(isConnectedCoil(state, worldIn, other_pos)) {
-			LOGGER.info("\t\ttrying to set power to " + pow + " for " + other_pos.toString());
-			if(worldIn.getBlockState(other_pos).get(power) != pow) {
-				worldIn.setBlockState(other_pos, worldIn.getBlockState(other_pos).with(power, pow));
-				LOGGER.info("\t\tpower set to " + worldIn.getBlockState(other_pos).get(power) + " for " + other_pos.toString());
-				worldIn.playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.BLOCK_METAL_PRESSURE_PLATE_CLICK_ON, SoundCategory.BLOCKS, 0.7f, 1.0f);
-			}
-			chainPowerCoilsRecursive(state, worldIn, other_pos, dir, pow, recursion_depth + 1);
-		}
-	}
-	
-	private int readRedstonePower(World worldIn, BlockPos pos, Axis axis) { //Coils read power from the ends only. Power from each end is added together.
-		int pow = 0;
-		if(axis.isVertical()) {
-			pow = worldIn.getStrongPower(pos, Direction.UP);
-			pow += worldIn.getStrongPower(pos, Direction.DOWN);
-		}
-		else if(axis.equals(Direction.Axis.Z)) {
-			pow = worldIn.getStrongPower(pos, Direction.NORTH);
-			LOGGER.info("Read " + pow + " power from north of " + pos.toString());
-			pow += worldIn.getStrongPower(pos, Direction.SOUTH);
-		}
-		else if(axis.equals(Direction.Axis.X)) {
-			pow = worldIn.getStrongPower(pos, Direction.EAST);
-			pow += worldIn.getStrongPower(pos, Direction.WEST);	
-		}
-		if(pow > 15) pow = 15;
-		LOGGER.info("Read " + pow + " power from ends of " + pos.toString());
-		return pow;
-	}
-	
-	@Override
     public void neighborChanged(BlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos other_pos, boolean isMoving) {
 		if(worldIn.isRemote) return;
 		
-		int pow = readRedstonePower(worldIn, pos, state.get(axis));
-		if(!isMiddleCoil(state, worldIn, pos) && state.get(power) != pow) {
+		int pow = worldIn.getStrongPower(pos);
+		if(state.get(power) != pow) {
 			worldIn.setBlockState(pos, state.with(power, pow));
-			chainPowerCoils(state, worldIn, pos);
 		}
 		
 		if(worldIn.getBlockState(other_pos).getMaterial().equals(Material.WATER) && state.get(heat) == 3) {
@@ -255,11 +156,6 @@ public class CopperCoil extends RotatedPillarBlock {
         	for(int i = 0; i < 5; i++) { 
         		worldIn.addParticle(ParticleTypes.CLOUD, pos.getX() + rand.nextFloat(), pos.getY() + 1, pos.getZ() + rand.nextFloat(), 0, rand.nextFloat()*0.1, 0);	        	
 	        }
-        }
-        if (stateIn.get(power) > 0){
-        	for(int i = 0; i < 3; i++) { 
-        		worldIn.addParticle(ParticleTypes.END_ROD, pos.getX() + rand.nextFloat()*1.1, pos.getY() + rand.nextFloat(), pos.getZ() + rand.nextFloat()*1.1, 0, 0, 0);
-        	}
         }
     }
 }
