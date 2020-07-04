@@ -93,37 +93,6 @@ public class CopperCoil extends RotatedPillarBlock {
 		return state.get(heat) * 2;
 	}
 	
-	/*@Override
-	public int getStrongPower(BlockState state, IBlockReader blockAccess, BlockPos pos, Direction side) {
-		return state.getWeakPower(blockAccess, pos, side);
-	}
-
-	@Override
-	public int getWeakPower(BlockState state, IBlockReader blockAccess, BlockPos pos, Direction side) { // Coils emit power only out the sides.
-		if(!state.get(axis).equals(side.getAxis()) && state.get(heat) < 3 && !isMiddleCoil(state, blockAccess, pos)){
-			return state.get(power) - state.get(heat);
-		}else {
-			return 0;
-		}
-	}
-	
-	private boolean isMiddleCoil(BlockState state, IBlockReader blockAccess, BlockPos pos){
-		boolean ret;
-		if(state.get(axis).isVertical()) {
-			ret = isConnectedCoil(state, blockAccess, pos.up());
-			ret = ret && isConnectedCoil(state, blockAccess, pos.down());
-		}
-		else if(state.get(axis).equals(Direction.Axis.Z)) {
-			ret = isConnectedCoil(state, blockAccess, pos.north());
-			ret = ret && isConnectedCoil(state, blockAccess, pos.south());		
-		}
-		else {
-			ret = isConnectedCoil(state, blockAccess, pos.east());
-			ret = ret && isConnectedCoil(state, blockAccess, pos.west());		
-		}
-		return ret;
-	}*/
-	
 	private boolean isConnectedCoil(BlockState state, IBlockReader blockAccess, BlockPos other_pos) {
 		return blockAccess.getBlockState(other_pos).getBlock().equals(this) && blockAccess.getBlockState(other_pos).get(axis).equals(state.get(axis));
 	}
