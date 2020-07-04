@@ -13,4 +13,6 @@ public class ModItems {
 
     public static final RegistryObject<Item> COIL_ITEM = ITEMS.register("coil", 
     		() -> new BlockItem(ModBlocks.COIL.get(), new Item.Properties().group(ItemGroup.REDSTONE)));
+    public static final RegistryObject<Item> ROD_ITEM = ITEMS.register("rod", 
+    		() -> new BlockItem(ModBlocks.ROD.get(), new Item.Properties().group(ItemGroup.REDSTONE)));
 }

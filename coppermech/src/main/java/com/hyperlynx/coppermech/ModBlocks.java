@@ -12,4 +12,5 @@ public class ModBlocks {
     public static final DeferredRegister<Block> BLOCKS = new DeferredRegister<>(ForgeRegistries.BLOCKS, CopperMech.MOD_ID);
 
     public static final RegistryObject<Block> COIL = BLOCKS.register("coil", () -> new CopperCoil());
+    public static final RegistryObject<Block> ROD = BLOCKS.register("rod", () -> new CopperRod());
 }

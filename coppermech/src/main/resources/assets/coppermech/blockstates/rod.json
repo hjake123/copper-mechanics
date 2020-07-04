@@ -1,0 +1,10 @@
+{
+    "variants": {
+        "facing=up": { "model": "coppermech:block/rod" },
+        "facing=down": { "model": "coppermech:block/rod", "x": 180 },
+        "facing=east": { "model": "coppermech:block/rod", "y": 90, "x": 90 },
+        "facing=south": { "model": "coppermech:block/rod", "y": 180, "x": 90 },
+        "facing=west": { "model": "coppermech:block/rod", "y": 270, "x": 90 },
+        "facing=north": { "model": "coppermech:block/rod", "y": 0, "x": 90 }
+    }
+}

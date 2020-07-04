@@ -22,7 +22,15 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
-coppermech/run/*
-coppermech/bin/*
-coppermech/build/*
-coppermech/.gradle/*
+coppermech/run/
+coppermech/bin/
+coppermech/build/
+coppermech/.gradle/
+coppermech/.gradle/4.10.3/taskHistory/taskHistory.lock
+coppermech/.gradle/4.10.3/taskHistory/taskHistory.bin
+coppermech/.gradle/4.10.3/javaCompile/taskHistory.bin
+coppermech/.gradle/4.10.3/javaCompile/classAnalysis.bin
+coppermech/.gradle/4.10.3/fileHashes/fileHashes.lock
+coppermech/.gradle/4.10.3/fileContent/fileContent.lock
+*.bin
+*.lock
