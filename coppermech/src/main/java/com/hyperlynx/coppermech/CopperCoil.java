@@ -7,23 +7,16 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.RotatedPillarBlock;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.particle.Particle;
 import net.minecraft.entity.Entity;
 import net.minecraft.particles.ParticleTypes;
-import net.minecraft.particles.RedstoneParticleData;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.EnumProperty;
 import net.minecraft.state.IntegerProperty;
 import net.minecraft.state.StateContainer.Builder;
 import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.tags.Tag;
 import net.minecraft.util.Direction;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
 import net.minecraft.util.Direction.Axis;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
@@ -37,9 +30,9 @@ public class CopperCoil extends RotatedPillarBlock {
 	public static final IntegerProperty power = BlockStateProperties.POWER_0_15;
 	public static final IntegerProperty heat = HeatProperty.HEAT;
 	public static final EnumProperty<Axis> axis = BlockStateProperties.AXIS;
-	public static final BooleanProperty coil_powered = BooleanProperty.create("coil_powered");
+	protected static final BooleanProperty coil_powered = BooleanProperty.create("coil_powered");
 	
-	private final float AMBIENT_HEAT_CHANCE = 0.003f;
+	private final float AMBIENT_HEAT_CHANCE = 0.006f;
 	private final int COIL_POWER_RANGE = 24;
 	
 	public CopperCoil() {
