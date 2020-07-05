@@ -61,6 +61,16 @@ public class CopperCoil extends RotatedPillarBlock implements IHeatable{
 	}
 	
 	@Override
+	public boolean canAcceptHeat(BlockState state) {
+		return true;
+	}
+	
+	@Override
+	public boolean canLoseHeat(BlockState state) {
+		return true;
+	}
+	
+	@Override
 	public boolean isBurning(BlockState state, IBlockReader world, BlockPos pos) {
 		return state.get(HEAT) > 2;
 	}
@@ -75,25 +85,6 @@ public class CopperCoil extends RotatedPillarBlock implements IHeatable{
 	@Override
 	public boolean isFireSource(BlockState state, IBlockReader world, BlockPos self, Direction side) {
 		return state.get(HEAT) > 2;
-	}
-	
-	@Override
-	public void acceptHeat(World worldIn, BlockPos pos, BlockState state, int amount) {
-		for(int i = 0; i < amount; i++) {
-			if(state.get(HEAT) < 3) {
-				worldIn.setBlockState(pos, state.with(HEAT, state.get(HEAT) + 1));
-			}
-		}
-	}
-
-	@Override
-	public void loseHeat(World worldIn, BlockPos pos, BlockState state, int amount) {
-		for(int i = 0; i < amount; i++) {
-			if(state.get(HEAT) > 0) {
-				worldIn.setBlockState(pos, state.with(HEAT, state.get(HEAT) - 1));
-			}
-		}
-		
 	}
 	
 	@Override public boolean hasComparatorInputOverride(BlockState state) {

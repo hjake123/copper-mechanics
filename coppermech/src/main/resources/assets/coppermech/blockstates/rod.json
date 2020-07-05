@@ -1,10 +1,23 @@
 {
-    "variants": {
-        "facing=up": { "model": "coppermech:block/rod" },
-        "facing=down": { "model": "coppermech:block/rod", "x": 180 },
-        "facing=east": { "model": "coppermech:block/rod", "y": 90, "x": 90 },
-        "facing=south": { "model": "coppermech:block/rod", "y": 180, "x": 90 },
-        "facing=west": { "model": "coppermech:block/rod", "y": 270, "x": 90 },
-        "facing=north": { "model": "coppermech:block/rod", "y": 0, "x": 90 }
-    }
+    "multipart":
+      [
+           {   "when": { "facing": "up" },
+               "apply": { "model": "coppermech:block/rod" }
+           },
+           {   "when": { "facing": "down" },
+               "apply": { "model": "coppermech:block/rod", "x": 180}
+           },
+           {   "when": { "facing": "east" },
+               "apply": { "model": "coppermech:block/rod", "y": 90, "x": 90}
+           },
+           {   "when": { "facing": "south" },
+               "apply": { "model": "coppermech:block/rod", "y": 180, "x": 90}
+           },
+           {   "when": { "facing": "west"},
+               "apply": { "model": "coppermech:block/rod", "y": 270, "x": 90}
+           },
+           {   "when": { "facing": "north" },
+               "apply": { "model": "coppermech:block/rod", "y": 0, "x": 90}
+           }
+       ]
 }
