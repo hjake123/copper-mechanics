@@ -15,6 +15,8 @@ import net.minecraft.state.IntegerProperty;
 import net.minecraft.state.StateContainer.Builder;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.Direction;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.Direction.Axis;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockReader;
@@ -47,7 +49,7 @@ public class CopperCoil extends RotatedPillarBlock implements IHeatable{
 	
 	@Override
 	public int tickRate(IWorldReader w) {
-		return 15;
+		return HEAT_TICK_SPEED;
 	}
 	
 	@Override
@@ -62,12 +64,14 @@ public class CopperCoil extends RotatedPillarBlock implements IHeatable{
 	
 	@Override
 	public boolean canAcceptHeat(BlockState state) {
-		return true;
+		if(state.getBlock().equals(this)) return state.get(HEAT) < 3;
+		return IHeatable.super.canAcceptHeat(state);
 	}
 	
 	@Override
 	public boolean canLoseHeat(BlockState state) {
-		return true;
+		if(state.getBlock().equals(this)) return state.get(HEAT) > 0;
+		return IHeatable.super.canAcceptHeat(state);
 	}
 	
 	@Override
@@ -149,6 +153,36 @@ public class CopperCoil extends RotatedPillarBlock implements IHeatable{
 	}
 	
 	@Override
+	public void acceptHeat(World worldIn, BlockPos pos, BlockState state, int amount) {
+		for(int i = 0; i < amount; i++) {
+			if(state.get(HEAT) > 0) {
+				worldIn.setBlockState(pos, state.with(HEAT, state.get(HEAT) + 1));
+			}
+		}
+	}
+	
+	@Override
+	public void sinkHeat(World worldIn, BlockState state, BlockPos pos, BlockPos other_pos, Random rand) {
+		if(canAcceptHeat(worldIn.getBlockState(other_pos))){
+			int other_temp = 0;
+			if(worldIn.getBlockState(other_pos).has(HEAT))
+				other_temp = worldIn.getBlockState(other_pos).get(HEAT);
+			if(other_temp < state.get(HEAT)) {
+				acceptHeat(worldIn, other_pos, worldIn.getBlockState(other_pos)); 
+				loseHeat(worldIn, pos, state);
+			}
+			
+		}
+		else if(worldIn.getBlockState(other_pos).isBurning(worldIn, other_pos)) {
+			acceptHeat(worldIn, pos, state, 2);
+		}
+		if(worldIn.isRainingAt(pos) && worldIn.canSeeSky(pos)) {
+			loseHeat(worldIn, pos, state);
+			worldIn.playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 0.4f, 1.0f);
+		}
+	}
+	
+	@Override
     public void neighborChanged(BlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos other_pos, boolean isMoving) {
 		if(worldIn.isRemote) return;
 		
@@ -171,12 +205,12 @@ public class CopperCoil extends RotatedPillarBlock implements IHeatable{
 			acceptHeat(worldIn, pos, state);
 		}
 		
-		sinkHeat(worldIn, state, pos, pos.add(0, 1, 0), rand);
-		sinkHeat(worldIn, state, pos, pos.add(1, 0, 0), rand);
-		sinkHeat(worldIn, state, pos, pos.add(-1, 0, 0), rand);
-		sinkHeat(worldIn, state, pos, pos.add(0, 0, 1), rand);
-		sinkHeat(worldIn, state, pos, pos.add(0, 0, -1), rand);
-		sinkHeat(worldIn, state, pos, pos.add(0, -1, 0), rand);
+		sinkHeat(worldIn, state, pos, pos.up(), rand);
+		sinkHeat(worldIn, state, pos, pos.north(), rand);
+		sinkHeat(worldIn, state, pos, pos.south(), rand);
+		sinkHeat(worldIn, state, pos, pos.east(), rand);
+		sinkHeat(worldIn, state, pos, pos.west(), rand);
+		sinkHeat(worldIn, state, pos, pos.down(), rand);
 		
 		if(pow == 0) {
 			loseHeat(worldIn, pos, state);
@@ -210,4 +244,6 @@ public class CopperCoil extends RotatedPillarBlock implements IHeatable{
 	        }
         }
     }
+
+	
 }

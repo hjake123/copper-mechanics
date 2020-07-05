@@ -14,7 +14,9 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockReader;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ToolType;
@@ -34,13 +36,18 @@ public class CopperRod extends EndRodBlock implements IHeatable {
 	}
 	
 	@Override
+	public int tickRate(IWorldReader w) {
+		return HEAT_TICK_SPEED;
+	}
+	
+	@Override
 	public boolean canProvidePower(BlockState state) {
 		return state.get(HEAT) < 3;
 	}
 	
 	@Override
 	public boolean canAcceptHeat(BlockState state) {
-		return true;
+		return state.get(HEAT) < 3;
 	}
 	
 	@Override
@@ -89,21 +96,45 @@ public class CopperRod extends EndRodBlock implements IHeatable {
 					//TODO: ignite a fire
 			}
 			
-			if(canAcceptHeat(blockStatePointedAt(worldIn, pos, state))){
-				acceptHeat(worldIn, posPointedAt(pos, state), blockStatePointedAt(worldIn, pos, state));
-				loseHeat(worldIn, pos, state);
+			if(blockStatePointedAt(worldIn, pos, state).getBlock().equals(this) && blockStatePointedAt(worldIn, pos, state).get(FACING).equals(state.get(FACING).getOpposite())) { // There is a pair being formed.
+				worldIn.setBlockState(posPointedAt(pos, state), worldIn.getBlockState(posPointedAt(pos, state)).with(HEAT, state.get(HEAT)));
+			}else {
+				sinkHeat(worldIn, state, pos, posPointedAt(pos, state), worldIn.getRandom());
 			}
+			
+			if(attachedBlockState(worldIn, pos, state).getBlock().equals(this) && attachedBlockState(worldIn, pos, state).get(FACING).equals(state.get(FACING).getOpposite())) { // There is a pair being formed.
+				worldIn.setBlockState(pos.offset(state.get(FACING).getOpposite()), worldIn.getBlockState(pos.offset(state.get(FACING).getOpposite())).with(HEAT, state.get(HEAT)));
+			}else {
+				sinkHeat(worldIn, state, pos, posPointedAt(pos, state), worldIn.getRandom());
+			}	
 		}
+	}
+	
+	@Override
+	public void sinkHeat(World worldIn, BlockState state, BlockPos pos, BlockPos other_pos, Random rand) {
+		while(canAcceptHeat(worldIn.getBlockState(other_pos)) && canLoseHeat(state)) {
+			loseHeat(worldIn, pos, state);
+			acceptHeat(worldIn, other_pos, worldIn.getBlockState(other_pos));
+		}
+	}
+	@Override
+	public void randomTick(BlockState state, ServerWorld worldIn, BlockPos pos, Random rand) {
+		sinkHeat(worldIn, state, pos, posPointedAt(pos, state), worldIn.getRandom());
+		sinkHeat(worldIn, state, pos, pos.offset(state.get(FACING).getOpposite()), worldIn.getRandom());
 	}
 	
 	@OnlyIn(Dist.CLIENT)
     @Override
     public void animateTick(BlockState stateIn, World worldIn, BlockPos pos, Random rand) {
-		if (stateIn.get(HEAT) == 3){
+		if (stateIn.get(HEAT) > 2){
         	for(int i = 0; i < 3; i++) { 
-        		worldIn.addParticle(ParticleTypes.FLAME, pos.offset(stateIn.get(FACING)).getX(), pos.getY() + 0.5, pos.offset(stateIn.get(FACING)).getX(), 0, 0, 0);
+        		worldIn.addParticle(ParticleTypes.FLAME, posPointedAt(pos, stateIn).getX(), pos.getY() + 0.5, posPointedAt(pos, stateIn).getZ(), 0, 0, 0);
+        	}
+		}
+		if (stateIn.get(HEAT) > 0){
+        	for(int i = 0; i < 3; i++) { 
+        		worldIn.addParticle(ParticleTypes.SMOKE, posPointedAt(pos, stateIn).getX(), pos.getY() + 0.6, posPointedAt(pos, stateIn).getZ(), 0, 0, 0);
         	}
 		}
     }
-
 }
