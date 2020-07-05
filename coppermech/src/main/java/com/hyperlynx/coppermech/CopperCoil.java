@@ -25,10 +25,10 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ToolType;
 import net.minecraftforge.api.distmarker.Dist;
 
-public class CopperCoil extends RotatedPillarBlock {
+public class CopperCoil extends RotatedPillarBlock implements IHeatable{
 	
 	public static final IntegerProperty POWER = BlockStateProperties.POWER_0_15;
-	public static final IntegerProperty HEAT = HeatProperty.HEAT;
+	public static final IntegerProperty HEAT = IHeatable.HEAT;
 	public static final EnumProperty<Axis> AXIS = BlockStateProperties.AXIS;
 	protected static final BooleanProperty COIL_POWERED = BooleanProperty.create("coil_powered");
 	
@@ -75,6 +75,25 @@ public class CopperCoil extends RotatedPillarBlock {
 	@Override
 	public boolean isFireSource(BlockState state, IBlockReader world, BlockPos self, Direction side) {
 		return state.get(HEAT) > 2;
+	}
+	
+	@Override
+	public void acceptHeat(World worldIn, BlockPos pos, BlockState state, int amount) {
+		for(int i = 0; i < amount; i++) {
+			if(state.get(HEAT) < 3) {
+				worldIn.setBlockState(pos, state.with(HEAT, state.get(HEAT) + 1));
+			}
+		}
+	}
+
+	@Override
+	public void loseHeat(World worldIn, BlockPos pos, BlockState state, int amount) {
+		for(int i = 0; i < amount; i++) {
+			if(state.get(HEAT) > 0) {
+				worldIn.setBlockState(pos, state.with(HEAT, state.get(HEAT) - 1));
+			}
+		}
+		
 	}
 	
 	@Override public boolean hasComparatorInputOverride(BlockState state) {
@@ -150,8 +169,7 @@ public class CopperCoil extends RotatedPillarBlock {
 		}
 		
 		if(worldIn.getBlockState(other_pos).getMaterial().equals(Material.WATER) && state.get(HEAT) == 3) {
-			HeatProperty.decrementHeat(worldIn, pos, state);
-			HeatProperty.decrementHeat(worldIn, pos, state);
+			loseHeat(worldIn, pos, state, 2);
 		}
     }
 
@@ -159,18 +177,18 @@ public class CopperCoil extends RotatedPillarBlock {
 	public void randomTick(BlockState state, ServerWorld worldIn, BlockPos pos, Random rand) {
 		int pow = state.get(POWER);
 		if(pow > 12 || pow > 0 && (rand.nextFloat() < (AMBIENT_HEAT_CHANCE*pow))) {
-			HeatProperty.incrementHeat(worldIn, pos, state);
+			acceptHeat(worldIn, pos, state);
 		}
 		
-		HeatProperty.sinkHeat(worldIn, state, pos, pos.add(0, 1, 0), rand);
-		HeatProperty.sinkHeat(worldIn, state, pos, pos.add(1, 0, 0), rand);
-		HeatProperty.sinkHeat(worldIn, state, pos, pos.add(-1, 0, 0), rand);
-		HeatProperty.sinkHeat(worldIn, state, pos, pos.add(0, 0, 1), rand);
-		HeatProperty.sinkHeat(worldIn, state, pos, pos.add(0, 0, -1), rand);
-		HeatProperty.sinkHeat(worldIn, state, pos, pos.add(0, -1, 0), rand);
+		sinkHeat(worldIn, state, pos, pos.add(0, 1, 0), rand);
+		sinkHeat(worldIn, state, pos, pos.add(1, 0, 0), rand);
+		sinkHeat(worldIn, state, pos, pos.add(-1, 0, 0), rand);
+		sinkHeat(worldIn, state, pos, pos.add(0, 0, 1), rand);
+		sinkHeat(worldIn, state, pos, pos.add(0, 0, -1), rand);
+		sinkHeat(worldIn, state, pos, pos.add(0, -1, 0), rand);
 		
 		if(pow == 0) {
-			HeatProperty.decrementHeat(worldIn, pos, state);
+			loseHeat(worldIn, pos, state);
 		}
 	}
 	
