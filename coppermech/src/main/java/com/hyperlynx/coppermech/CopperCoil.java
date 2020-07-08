@@ -91,13 +91,23 @@ public class CopperCoil extends RotatedPillarBlock implements IHeatable{
 		return state.get(HEAT) > 2;
 	}
 	
+	@Override
+	public boolean canProvidePower(BlockState state) {
+		return state.get(HEAT) < 3;
+	}
+	
 	@Override public boolean hasComparatorInputOverride(BlockState state) {
 		return true;
 	}
 	
 	@Override
+	public int getWeakPower(BlockState state, IBlockReader br, BlockPos pos, Direction side) {
+		return Math.max(state.get(POWER) - (state.get(HEAT) * 5), 0);
+	}
+	
+	@Override
 	public int getComparatorInputOverride(BlockState state, World world, BlockPos pos) {
-		return state.get(HEAT) * 2;
+		return state.get(HEAT) * 3;
 	}
 	
 	private boolean isConnectedCoil(BlockState state, IBlockReader blockAccess, BlockPos other_pos) {
