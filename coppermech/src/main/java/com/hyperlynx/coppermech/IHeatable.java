@@ -39,5 +39,23 @@ public interface IHeatable {
 	public default void acceptHeat(World worldIn, BlockPos pos, BlockState state) { acceptHeat(worldIn, pos, state, 1); }
 	public default void loseHeat(World worldIn, BlockPos pos, BlockState state) { loseHeat(worldIn, pos, state, 1); }
 	
-	public void sinkHeat(World worldIn, BlockState state, BlockPos pos, BlockPos other_pos, Random rand);
+	public default void sinkHeat(World worldIn, BlockState state, BlockPos pos, BlockPos other_pos, Random rand) {
+		if(canAcceptHeat(worldIn.getBlockState(other_pos))){
+			int other_temp = 0;
+			if(worldIn.getBlockState(other_pos).has(HEAT))
+				other_temp = worldIn.getBlockState(other_pos).get(HEAT);
+			if(other_temp < state.get(HEAT)) {
+				acceptHeat(worldIn, other_pos, worldIn.getBlockState(other_pos)); 
+				loseHeat(worldIn, pos, state);
+			}
+			
+		}
+		else if(worldIn.getBlockState(other_pos).isBurning(worldIn, other_pos)) {
+			acceptHeat(worldIn, pos, state, 2);
+		}
+		if(worldIn.isRainingAt(pos) && worldIn.canSeeSky(pos)) {
+			loseHeat(worldIn, pos, state);
+			worldIn.playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 0.4f, 1.0f);
+		}
+	}
 }
