@@ -14,7 +14,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 @Mod("coppermech")
 public class CopperMech {
 	
-	private static final Logger LOGGER = LogManager.getLogger();
+	protected static final Logger LOGGER = LogManager.getLogger();
     public static final String MOD_ID = "coppermech";
     
     public CopperMech() {

@@ -188,20 +188,23 @@ public class CopperCoil extends RotatedPillarBlock implements IHeatable{
     public void neighborChanged(BlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos other_pos, boolean isMoving) {
 		if(worldIn.isRemote) return;
 		
-		int pow = worldIn.getStrongPower(pos);
-		if(!state.get(COIL_POWERED) && state.get(POWER) != pow) {
-			worldIn.setBlockState(pos, state.with(POWER, pow));
-			chainPower(state, worldIn, pos, pow);
-			worldIn.notifyNeighborsOfStateChange(pos, blockIn);
-		}
+		updateRedstoneState(worldIn, pos, state, blockIn, worldIn.getStrongPower(pos));
 		
 		if(worldIn.getBlockState(other_pos).getMaterial().equals(Material.WATER) && state.get(HEAT) == 3) {
 			loseHeat(worldIn, pos, state, 2);
 		}
     }
+	
+	public void updateRedstoneState(World worldIn, BlockPos pos, BlockState state, Block blockIn, int pow) {
+		if(!state.get(COIL_POWERED) && state.get(POWER) != pow) {
+			worldIn.setBlockState(pos, state.with(POWER, pow));
+			chainPower(state, worldIn, pos, pow);
+			worldIn.notifyNeighborsOfStateChange(pos, blockIn);
+		}
+	}
 
 	@Override
-	public void randomTick(BlockState state, ServerWorld worldIn, BlockPos pos, Random rand) {
+	public void randomTick(BlockState state, ServerWorld worldIn, BlockPos pos, Random rand) {		
 		int pow = state.get(POWER);
 		if(pow > 12 || pow > 0 && (rand.nextFloat() < (AMBIENT_HEAT_CHANCE*pow))) {
 			acceptHeat(worldIn, pos, state);
