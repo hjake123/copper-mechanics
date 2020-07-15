@@ -13,7 +13,7 @@ import net.minecraft.world.World;
 public interface IHeatable {
 	
 	public static final IntegerProperty HEAT = IntegerProperty.create("heat", 0, 3);
-	public static final int HEAT_TICK_SPEED = 30;
+	public static final int HEAT_TICK_SPEED = 10;
 	
 	// These should be overridden for any heat using block.
 	public default boolean canAcceptHeat(BlockState state) {

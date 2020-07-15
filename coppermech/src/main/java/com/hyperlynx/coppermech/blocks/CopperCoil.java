@@ -1,6 +1,8 @@
-package com.hyperlynx.coppermech;
+package com.hyperlynx.coppermech.blocks;
 
 import java.util.Random;
+
+import com.hyperlynx.coppermech.IHeatable;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -164,10 +166,14 @@ public class CopperCoil extends RotatedPillarBlock implements IHeatable{
 	
 	@Override
 	public void acceptHeat(World worldIn, BlockPos pos, BlockState state, int amount) {
-		for(int i = 0; i < amount; i++) {
-			if(state.get(HEAT) > 0) {
-				worldIn.setBlockState(pos, state.with(HEAT, state.get(HEAT) + 1));
+		if(state.getBlock().equals(this)) {
+			for(int i = 0; i < amount; i++) {
+				if(state.get(HEAT) < 3) {
+					worldIn.setBlockState(pos, state.with(HEAT, state.get(HEAT) + 1));
+				}
 			}
+		}else {
+			IHeatable.super.acceptHeat(worldIn, pos, state, amount);
 		}
 	}	
 	

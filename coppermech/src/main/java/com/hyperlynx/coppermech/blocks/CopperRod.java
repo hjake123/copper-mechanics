@@ -1,14 +1,20 @@
-package com.hyperlynx.coppermech;
+package com.hyperlynx.coppermech.blocks;
 
 import java.util.Random;
 
+import com.google.common.collect.ImmutableMap;
+import com.hyperlynx.coppermech.IHeatable;
+import com.hyperlynx.coppermech.ModBlocks;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.EndRodBlock;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.effect.LightningBoltEntity;
 import net.minecraft.particles.ParticleTypes;
+import net.minecraft.state.IProperty;
 import net.minecraft.state.StateContainer.Builder;
 import net.minecraft.util.Direction;
 import net.minecraft.util.SoundCategory;
@@ -46,6 +52,11 @@ public class CopperRod extends EndRodBlock implements IHeatable {
 	@Override
 	public boolean canProvidePower(BlockState state) {
 		return state.get(HEAT) < 3;
+	}
+	
+	@Override
+	public boolean isBurning(BlockState state, IBlockReader world, BlockPos pos) {
+		return state.get(HEAT) > 2;
 	}
 	
 	@Override
@@ -90,7 +101,8 @@ public class CopperRod extends EndRodBlock implements IHeatable {
 	// TODO: You should find a better way to do this.
 	@Override
     public void neighborChanged(BlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos other_pos, boolean isMoving) {
-		if(!worldIn.getBlockState(other_pos).getBlock().equals(this)) worldIn.notifyNeighborsOfStateChange(pos, blockIn);
+		if(!worldIn.getBlockState(other_pos).getBlock().equals(this)) 
+			worldIn.notifyNeighborsOfStateChange(pos, blockIn);
 	}
 	
 	public static BlockPos posPointedAt(BlockPos pos, BlockState state) {
@@ -107,16 +119,28 @@ public class CopperRod extends EndRodBlock implements IHeatable {
 	
 	@Override
 	public void acceptHeat(World worldIn, BlockPos pos, BlockState state, int amount) {
-		for(int i = 0; i < amount; i++) {
-			if(state.get(HEAT) < 3) {
-				worldIn.setBlockState(pos, state.with(HEAT, state.get(HEAT) + 1));
+		if(state.getBlock().equals(this)) {
+			for(int i = 0; i < amount; i++) {
+				if(state.get(HEAT) < 3) {
+					worldIn.setBlockState(pos, state.with(HEAT, state.get(HEAT) + 1));
+				}
 			}
-			else if(blockStatePointedAt(worldIn, pos, state).isFlammable(worldIn, posPointedAt(pos, state), state.get(FACING).getOpposite())){
-				worldIn.playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 0.4f, 1.0f);
-				//TODO: ignite a fire
-			}
+		}else {
+			IHeatable.super.acceptHeat(worldIn, pos, state, amount);
 		}
 	}
+	
+	@Override
+	public void sinkHeat(World worldIn, BlockState state, BlockPos pos, BlockPos other_pos, Random rand) {
+		if(state.get(HEAT) == 3 && blockStatePointedAt(worldIn, pos, state).isFlammable(worldIn, posPointedAt(pos, state), state.get(FACING).getOpposite())){
+			worldIn.playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 0.4f, 1.0f);
+			if(worldIn.isAirBlock(posPointedAt(pos, state).up())) {
+				worldIn.setBlockState(posPointedAt(pos, state).up(), Blocks.FIRE.getDefaultState());
+			}
+		}
+		IHeatable.super.sinkHeat(worldIn, state, pos, other_pos, rand);
+	}
+	
 	
 	@Override
 	public void randomTick(BlockState state, ServerWorld worldIn, BlockPos pos, Random rand) {
@@ -128,7 +152,6 @@ public class CopperRod extends EndRodBlock implements IHeatable {
 			worldIn.addLightningBolt(new LightningBoltEntity(worldIn, pos.getX(), pos.getY(), pos.getZ(), true));
 			acceptHeat(worldIn, pos, state, 3);
 		}
-		
 	}
 	
 	private float realXPointedAt(BlockPos pos, BlockState state) {
@@ -177,7 +200,7 @@ public class CopperRod extends EndRodBlock implements IHeatable {
         		worldIn.addParticle(ParticleTypes.SMOKE, realXPointedAt(pos, stateIn), realYPointedAt(pos, stateIn), realZPointedAt(pos, stateIn), 0, 0, 0);
         	}
 		}		
-		if (worldIn.getBlockState(pos).get(FACING).equals(Direction.UP) && pos.getY() > LIGHTNING_HEIGHT && worldIn.isThundering() && rand.nextFloat() < 0.1){
+		if (stateIn.get(FACING).equals(Direction.UP) && pos.getY() > LIGHTNING_HEIGHT && worldIn.isThundering() && worldIn.canBlockSeeSky(pos) && rand.nextFloat() < 0.1){
     		worldIn.addParticle(ParticleTypes.END_ROD, realXPointedAt(pos, stateIn), realYPointedAt(pos, stateIn), realZPointedAt(pos, stateIn), 0, 0, 0);
 		}
     }
