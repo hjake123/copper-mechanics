@@ -1,5 +1,7 @@
 package com.hyperlynx.coppermech;
 
+import com.hyperlynx.coppermech.items.Pointer;
+
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -15,4 +17,6 @@ public class ModItems {
     		() -> new BlockItem(ModBlocks.COIL.get(), new Item.Properties().group(ItemGroup.REDSTONE)));
     public static final RegistryObject<Item> ROD_ITEM = ITEMS.register("rod", 
     		() -> new BlockItem(ModBlocks.ROD.get(), new Item.Properties().group(ItemGroup.REDSTONE)));
+    
+    public static final RegistryObject<Item> POINTER = ITEMS.register("pointer", () -> new Pointer()) ;
 }
