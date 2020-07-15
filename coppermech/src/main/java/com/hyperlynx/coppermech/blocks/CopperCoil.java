@@ -108,6 +108,12 @@ public class CopperCoil extends RotatedPillarBlock implements IHeatable{
 	}
 	
 	@Override
+	public int getStrongPower(BlockState state, IBlockReader br, BlockPos pos, Direction side) {
+		return 0;
+	}
+	
+	
+	@Override
 	public int getComparatorInputOverride(BlockState state, World world, BlockPos pos) {
 		return state.get(HEAT) * 3;
 	}
@@ -118,6 +124,7 @@ public class CopperCoil extends RotatedPillarBlock implements IHeatable{
 	
 	//Powers all coils that are connected to the one whose state and position are passed in with the same power as that coil.
 	private void chainPower(BlockState state, World worldIn, BlockPos pos, int pow) {
+		if(state.get(HEAT) == 3) return;
 		if(state.get(AXIS).isVertical()) {
 			if(isConnectedCoil(state, worldIn, pos.up())){
 				chainPowerRecursive(state, worldIn, pos,  Direction.UP, pow, 0);
