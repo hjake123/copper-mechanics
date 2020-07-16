@@ -48,6 +48,12 @@ public class Pointer extends Item {
 	}
 	
 	@Override
+	public boolean shouldCauseReequipAnimation(ItemStack old_stack, ItemStack new_stack, boolean slotChanged) {
+		if(!slotChanged) return false;
+		else return super.shouldCauseReequipAnimation(old_stack, new_stack, slotChanged);
+	}
+	
+	@Override
 	public void onUsingTick(ItemStack stack, LivingEntity player, int count) {
 		Vec3d eye_vec = player.getEyePosition(1);
 		Vec3d look_vec = player.getLook(1);
@@ -76,26 +82,30 @@ public class Pointer extends Item {
 					}
 				}
 				else {
-					BlockPos old_pos = new BlockPos(stack.getOrCreateTag().getInt("pos_x"), stack.getOrCreateTag().getInt("pos_y"), stack.getOrCreateTag().getInt("pos_z"));
-					if(!old_pos.equals(trace.getPos()) && stack.getOrCreateTag().getBoolean("powering_coil")) {
-						BlockState bs = player.world.getBlockState(old_pos);
-						CopperCoil cc = (CopperCoil) bs.getBlock();
-						cc.updateRedstoneState(player.world, old_pos, bs, cc, player.world.getStrongPower(old_pos));
-						stack.getOrCreateTag().putBoolean("powering_coil", false);
-					}
+					resetCoilPower(stack, player.world, player, trace.getPos());
 				}
 			}
 		}
 	}
 	
+	private void resetCoilPower(ItemStack stack, World world, LivingEntity player, BlockPos pos) {
+		BlockPos old_pos = new BlockPos(stack.getOrCreateTag().getInt("pos_x"), stack.getOrCreateTag().getInt("pos_y"), stack.getOrCreateTag().getInt("pos_z"));
+		if(!old_pos.equals(pos) && stack.getOrCreateTag().getBoolean("powering_coil")) {
+			BlockState bs = player.world.getBlockState(old_pos);
+			CopperCoil cc = (CopperCoil) bs.getBlock();
+			cc.updateRedstoneState(player.world, old_pos, bs, cc, player.world.getStrongPower(old_pos));
+			stack.getOrCreateTag().putBoolean("powering_coil", false);
+		}
+	}
+	
 	@Override
 	public void onPlayerStoppedUsing(ItemStack stack, World world, LivingEntity player, int time) {
-		stack.getOrCreateTag().putBoolean("powering_coil", false);
+		resetCoilPower(stack, player.world, player, null);
 	}
 	
 	@Override
 	public ItemStack onItemUseFinish(ItemStack stack, World world, LivingEntity player) {
-		stack.getOrCreateTag().putBoolean("powering_coil", false);
+		resetCoilPower(stack, player.world, player, null);
 		return stack;
 	}
 }
