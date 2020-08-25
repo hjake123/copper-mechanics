@@ -1,2 +1,2 @@
 # copper-mechanics
- A Minecraft Mod to add uses to copper.
+ A Minecraft Mod to add more uses to copper with complex redstone-active components!

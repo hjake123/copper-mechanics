@@ -1,0 +1,18 @@
+{
+	"parent": "item/generated",
+	"textures": {
+		"layer0": "coppermech:item/pointer"
+	},
+	"display":{
+		"thirdperson_righthand": {
+      "rotation": [ 13, 90, 0 ],
+      "translation": [ -0.25, 5.25, -1.00 ],
+      "scale": [ 0.61, 0.61, 0.61 ]
+    },
+    "firstperson_righthand": {
+      "rotation": [ 0, 0, 0 ],
+      "translation": [ 1.13, 3.20, 1.13 ],
+      "scale": [ 0.68, 0.68, 0.68 ]
+    }
+	}
+}

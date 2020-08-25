@@ -1,0 +1,14 @@
+{
+	"parent": "item/generated",
+	"textures": {
+		"layer0": "coppermech:item/pointer"
+	},
+	"overrides": [
+    {
+      "predicate": {
+        "pulling": 1
+      },
+      "model": "coppermech:item/pointer_pointing"
+    }
+  ]
+}

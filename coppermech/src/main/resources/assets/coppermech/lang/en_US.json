@@ -1,3 +1,5 @@
 {
-  "block.coppermech.coil": "Coil"
+  "block.coppermech.coil": "Coil",
+  "block.coppermech.rod": "Copper Rod",
+  "item.coppermech.pointer" : "Pointer"
 }
