@@ -99,10 +99,11 @@ public class CopperRod extends EndRodBlock implements IHeatable {
 	
 	// Lie to the world about changing state when your neighbors do so that updates to coils will get neighbors to re-test your signal. 
 	// TODO: You should find a better way to do this.
+	// TODO: Make the rod not notify the coil it rests on.
 	@Override
     public void neighborChanged(BlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos other_pos, boolean isMoving) {
 		if(!worldIn.getBlockState(other_pos).getBlock().equals(this)) 
-			worldIn.notifyNeighborsOfStateChange(pos, blockIn);
+			worldIn.notifyNeighborsOfStateExcept(pos, blockIn, state.get(FACING).getOpposite());
 	}
 	
 	public static BlockPos posPointedAt(BlockPos pos, BlockState state) {
